@@ -47,6 +47,8 @@ def create_test(usage_str, node,label,base_isa,max_inst):
                 flen = 64
             elif '.s' in opcode:
                 flen = 32
+            elif '.h' in opcode:
+                flen = 16
             else:
                 flen = op_node['flen'][0]
             #if flen not in op_node['flen']:

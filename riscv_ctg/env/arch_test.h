@@ -91,7 +91,29 @@
     #define FLREG flw
     #define FSREG fsw
     #define FREGWIDTH 4
+
+  #else
+      #if FLEN==16
+        #define FLREG flh
+        #define FSREG fsh
+        #define FREGWIDTH 2
+      #endif
   #endif
+#endif
+
+#if XLEN==64
+  #if FLEN==32
+    #define SREG sw
+    #define LREG lW
+    #define REGWIDTH 4
+    #define MASK 0xFFFFFFFF
+  #endif
+#endif
+#if FLEN == 16
+  #define SREG sh
+  #define LREG lh
+  #define REGWIDTH 2
+  #define MASK 0xFFFF
 #endif
 
 #define MMODE_SIG 3
