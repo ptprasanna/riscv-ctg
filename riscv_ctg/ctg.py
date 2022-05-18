@@ -43,12 +43,20 @@ def create_test(usage_str, node,label,base_isa,max_inst):
             logger.warning("Skipping {0} since its not supported in current XLEN:".format(opcode))
             return
         if 'flen' in op_node:
-            if '.d' in opcode:
-                flen = 64
-            elif '.s' in opcode:
-                flen = 32
-            elif '.h' in opcode:
-                flen = 16
+            if "." in opcode:
+                value = opcode.split(".")[1]
+                if 'd' in value:
+                    flen = 64
+                elif 's' in value:
+                    flen = 32
+                elif 'h' in value:
+                    flen = 16
+            # if '.d' in opcode:
+            #     flen = 64
+            # elif '.s' in opcode:
+            #     flen = 32
+            # elif '.h' in opcode:
+            #     flen = 16
             else:
                 flen = op_node['flen'][0]
             #if flen not in op_node['flen']:
