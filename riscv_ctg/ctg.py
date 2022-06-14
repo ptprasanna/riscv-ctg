@@ -26,6 +26,12 @@ def create_test(usage_str, node,label,base_isa,max_inst):
         logger.info("Ignoring :" + str(label))
         if node['ignore']:
             return
+    #-------------------ZFINX------------------------
+    #To capture the presense of Zfinx in the ISA
+    has_Zfinx=False
+    if "Zfinx" in str(node['config']):
+        has_Zfinx=True
+    #------------------------------------------------
     for opcode in node['opcode']:
         op_node=None
         if opcode not in op_template:
@@ -35,7 +41,23 @@ def create_test(usage_str, node,label,base_isa,max_inst):
                     break
         else:
             op_node = op_template[opcode]
-
+            #------------------ZFINX--------------------
+            #In the present template.yaml, rs1_op_data for '.s' instructions are "*all_fregs" however for Zfinx we need *all_regs, 
+            # so we need a selection type variable for rsx_op_data
+            #in the case of Zfinx, we cannot modify the template.yaml since it would affect the F-extension, hence we are hardcoding the values of ISA,op_node in the case of Zfinx.
+            #Below code modifies the param 
+            if opcode in ["fadd.s","fsub.s","fclass.s","fmul.s","fdiv.s","fsqrt.s","fmadd.s","fmsub.s","fnmadd.s","fnmsub.s","fmax.s","fmin.s","feq.s","flt.s","fle.s","fmv.x.w","fmv.w.x","fcvt.wu.s","fcvt.s.wu","fcvt.w.s","fcvt.s.w","fsgnj.s","fsgnjn.s","fsgnjx.s","fcvt.s.l", "fcvt.s.lu","fcvt.l.s","fcvt.lu.s"]:
+                if has_Zfinx == False:
+                    op_node['isa'] = ['IF']
+                else:
+                    op_node['isa'] = ['IZfinx']
+                    op_node['rs1_op_data'] = op_node['rs1_op_data'][:2]+'x' + op_node['rs1_op_data'][3:]
+                    if 'rs2_op_data' in op_node:
+                        op_node['rs2_op_data'] = op_node['rs2_op_data'][:2]+'x' + op_node['rs2_op_data'][3:]
+                    if 'rs3_op_data' in op_node:
+                        op_node['rs3_op_data'] = op_node['rs3_op_data'][:2]+'x' + op_node['rs3_op_data'][3:]
+                    op_node['rd_op_data']  = op_node['rd_op_data'][:2] +'x' + op_node['rd_op_data'][3:]
+            #--------------------------------------------
         if op_node is  None:
             logger.warning("Skipping :" + str(opcode))
             return
@@ -43,7 +65,9 @@ def create_test(usage_str, node,label,base_isa,max_inst):
             logger.warning("Skipping {0} since its not supported in current XLEN:".format(opcode))
             return
         if 'flen' in op_node:
-            if "." in opcode:
+            op_split = opcode.split(".")
+            #In the case of instruction with single "."(e.g fadd.s,...), assign flen as per below,
+            if "." in opcode and len(op_split) == 2:
                 value = opcode.split(".")[1]
                 if 'd' in value:
                     flen = 64
@@ -57,7 +81,8 @@ def create_test(usage_str, node,label,base_isa,max_inst):
             #     flen = 32
             # elif '.h' in opcode:
             #     flen = 16
-            else:
+            #In case if the instruction with double ".", (e.g fcvt.d.w,...) assign flen as per the mininum supportable flen from template.yaml
+            else: 
                 flen = op_node['flen'][0]
             #if flen not in op_node['flen']:
             #    return

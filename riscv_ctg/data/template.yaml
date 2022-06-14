@@ -2823,7 +2823,7 @@ fcvt.s.h:
   xlen: [32,64]
   isa:
     - IFZfh
-  flen: [32,64]
+  flen: [16]
   std_op:
   formattype: 'fsrformat'
   rs1_op_data: *all_fregs
@@ -2839,7 +2839,7 @@ fcvt.h.s:
   xlen: [32,64]
   isa:
     - IFZfh
-  flen: [32,64]
+  flen: [16]
   std_op:
   formattype: 'fsrformat'
   rs1_op_data: *all_fregs

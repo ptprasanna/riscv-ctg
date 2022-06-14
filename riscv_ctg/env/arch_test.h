@@ -100,6 +100,38 @@
       #endif
   #endif
 #endif
+//For the case of TEST_FPIO_OP() macro, load instruction will be based on both XLEN and FLEN
+//Below checks will ensure the correct load instuction for a specific XLEN & FLEN
+#if XLEN==32
+	#if FLEN==16
+		#define _LREG lh
+	#endif
+	#if FLEN==32
+		#define _LREG lw
+	#endif
+	#if FLEN==64
+		#define _LREG lw
+	#endif
+#endif
+
+#if XLEN==64
+	#if FLEN==16
+		#define _LREG lh
+	#endif
+	#if FLEN==32
+		#define _LREG lw
+	#endif
+	#if FLEN==64
+		#define _LREG ld
+	#endif
+#endif
+
+#if ZFINX==1
+    #define FLREG lw
+    #define FSREG sw
+    #define FREGWIDTH 4
+#endif
+
 
 #define MMODE_SIG 3
 #define RLENG (REGWIDTH<<3)
@@ -915,7 +947,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg,offset)
 //Tests for floating-point instructions with a single register operand and integer operand register
 #define TEST_FPIO_OP( inst, destreg, freg, rm, correctval, valaddr_reg, val_offset, flagreg, swreg, offset, testreg) \
     TEST_CASE_F(testreg, destreg, correctval, swreg, flagreg, offset, \
-      LREG freg, val_offset(valaddr_reg); \
+      _LREG freg, val_offset(valaddr_reg); \
       csrrwi x0, frm, rm; \
       inst destreg, freg; \
       csrrs flagreg, fflags, x0; \

@@ -971,6 +971,13 @@ class Generator():
            offset = 0
            val_offset = 0
            hardcoded_regs = ['x15','x16','x17']
+           #---------------------------------       
+           #Additional Hardcoded regs
+           hardcoded_regs_1 = ['x19','x20','x21']
+           hardcoded_regs_2 = ['x23','x24','x25']
+           hardcoded_regs_3 = ['x26','x27','x28']
+           
+           #---------------------------------
            flag = True
            for i in range(len(instr_dict)):
                 if 'swreg' not in instr_dict[i]:
@@ -988,10 +995,32 @@ class Generator():
                         elif flag:
                             offset = 0
                             flag = False
-                    elif instr_dict[i]['rs1'] in hardcoded_regs or instr_dict[i]['rd'] in hardcoded_regs:
+                    #-------------------------ZFINX-----------------------------
+                    #For Zfinx, at max we use 4 integer registers, i,e for fnmadd 3 source operand(rs1,rs2,rs3) & 1 destination operand(rd)
+                    #So These registers should be different from the ones that are used for 'swreg', 'valaddr_reg' & 'flagreg'
+                    #Hence we use the below checks to modify, swreg,valaddr_reg & flagreg based on rs & rd registers.
+                    elif instr_dict[i]['rs1'] in hardcoded_regs or instr_dict[i]['rd'] in hardcoded_regs or ('rs2' in instr_dict[i] and instr_dict[i]['rs2'] in hardcoded_regs) \
+                                                                                                        or ('rs3' in instr_dict[i] and instr_dict[i]['rs3'] in hardcoded_regs):
                         instr_dict[i]['swreg'] = 'x19'
                         instr_dict[i]['valaddr_reg'] = 'x20'
                         instr_dict[i]['flagreg'] = 'x21'
+                        if instr_dict[i]['rs1'] in hardcoded_regs_1 or instr_dict[i]['rd'] in hardcoded_regs_1 or ('rs2' in instr_dict[i] and instr_dict[i]['rs2'] in hardcoded_regs_1) \
+                                                                                                                or  ('rs3' in instr_dict[i] and instr_dict[i]['rs3'] in hardcoded_regs_1):
+                            instr_dict[i]['swreg'] = 'x23'
+                            instr_dict[i]['valaddr_reg'] = 'x24'
+                            instr_dict[i]['flagreg'] = 'x25'
+                            if instr_dict[i]['rs1'] in hardcoded_regs_2 or instr_dict[i]['rd'] in hardcoded_regs_2 or ('rs2' in instr_dict[i] and instr_dict[i]['rs2'] in hardcoded_regs_2) \
+                                                                                                                    or  ('rs3' in instr_dict[i] and instr_dict[i]['rs3'] in hardcoded_regs_2):
+                                instr_dict[i]['swreg'] = 'x26'
+                                instr_dict[i]['valaddr_reg'] = 'x27'
+                                instr_dict[i]['flagreg'] = 'x28'
+                                if instr_dict[i]['rs1'] in hardcoded_regs_3 or instr_dict[i]['rd'] in hardcoded_regs_3 or ('rs2' in instr_dict[i] and instr_dict[i]['rs2'] in hardcoded_regs_3) \
+                                                                                                                    or  ('rs3' in instr_dict[i] and instr_dict[i]['rs3'] in hardcoded_regs_3):
+                                    instr_dict[i]['swreg'] = 'x12'
+                                    instr_dict[i]['valaddr_reg'] = 'x13'
+                                    instr_dict[i]['flagreg'] = 'x14'
+
+                    #-----------------------------------------------------------
                         if not flag:
                             flag = True
                             offset = 0
