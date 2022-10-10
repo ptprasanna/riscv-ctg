@@ -39,7 +39,7 @@
     .option push;\
     .option norvc;\
     .align UNROLLSZ;\
-        li reg,val;\
+    li reg,val;\
     .align UNROLLSZ;\
     .option pop;
 
@@ -97,6 +97,28 @@
     #else
         #define SIGALIGN 4
     #endif
+  #endif
+#endif
+
+#if ZFINX==1
+  #define FLREG lw
+  #define FSREG sw
+  #define FREGWIDTH 4
+  #define FLEN 32
+  #if XLEN==64
+      #define SIGALIGN 8
+  #else
+      #define SIGALIGN 4
+  #endif
+#elif ZDINX==1
+  #define FLREG lw
+  #define FSREG sw
+  #define FREGWIDTH 4
+  #define FLEN 64
+  #if XLEN==64
+    #define SIGALIGN 8
+  #else
+    #define SIGALIGN 4
   #endif
 #endif
 
@@ -610,17 +632,17 @@ rvtest_data_end:
 #define NARG(...) _ARG5(__VA_OPT__(__VA_ARGS__,)4,3,2,1,0)
 
 #define LOAD_MEM_VAL(_LINST, _AREG, _RD, _OFF, _TREG)  \
-    .if _OFF >= 2048                                  ;\
-        .set _off, _OFF%2048                          ;\
-        LI(_TREG, _OFF-_off)                          ;\
-        add _AREG,_AREG,_TREG                         ;\
-    .else                                             ;\
-        .set _off, _OFF                               ;\
-    .endif                                            ;\
-    _LINST _RD, _off(_AREG)                           ;\
-    .if _OFF >= 2048                                  ;\
-        sub _AREG,_AREG,_TREG                         ;\
-    .endif
+  .if _OFF >= 2048                                  ;\
+    .set _off, _OFF%2048                          ;\
+    LI(_TREG, _OFF-_off)                          ;\
+    add _AREG,_AREG,_TREG                         ;\
+  .else                                             ;\
+    .set _off, _OFF                               ;\
+  .endif                                            ;\
+  _LINST _RD, _off(_AREG)                        ;\
+  .if _OFF >= 2048                                  ;\
+    sub _AREG,_AREG,_TREG                         ;\
+  .endif
 
  /* use this function to ensure individual signature stores don't exceed offset limits */
   /* if they would, then update the base by offset & reduce offset by -2048             */
@@ -641,7 +663,7 @@ rvtest_data_end:
  /* RVTEST_SIGUPD(basereg, sigreg,newoff) stores sigreg at newoff(basereg) and updates offset to regwidth+newoff */
 #define RVTEST_SIGUPD(_BR,_R,...)		         \
   .if NARG(__VA_ARGS__) == 1                            ;\
-	.set offset,_ARG1(__VA_OPT__(__VA_ARGS__,0))	;\
+	  .set offset,_ARG1(__VA_OPT__(__VA_ARGS__,0))	;\
   .endif                                                ;\
   CHK_OFFSET(_BR,REGWIDTH,0);\
    SREG _R,offset(_BR)                                  ;\
@@ -1059,7 +1081,8 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
     TEST_CASE_F(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg1, val_offset, testreg); \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg2, (val_offset+FREGWIDTH), testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      LI(testreg, fcsr_val); \
+      csrw fcsr, testreg; \
       inst destreg, freg1, freg2, rm; \
       csrr flagreg, fcsr; \
     )

@@ -19,11 +19,12 @@ from riscv_isac.cgf_normalize import expand_cgf
 @click.option('--flen','-fl',type=click.Choice(['32','64','0']),help="Value of FLEN in\
         hardware.",default='0')
 @click.option("--inst",type=int,help="Maximum number of Macro Instances per test.")
-def cli(verbose, out_dir, randomize , cgf,procs,base_isa, flen,inst):
+@click.option("--z-inx", '-ix', type=bool, default='False', help="If the extensiion is Z*inx then pass True otherwise defaulted to False")
+def cli(verbose, out_dir, randomize , cgf,procs,base_isa, flen,inst,z_inx):
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
     if '32' in base_isa:
         xlen = 32
     elif '64' in base_isa:
         xlen = 64
-    ctg(verbose, out_dir, randomize ,xlen, int(flen), cgf,procs,base_isa,inst)
+    ctg(verbose, out_dir, randomize ,xlen, int(flen), cgf,procs,base_isa,inst,z_inx)

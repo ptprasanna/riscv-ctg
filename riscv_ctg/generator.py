@@ -181,7 +181,7 @@ class Generator():
     :type xl: int
     :type base_isa_str: str
     '''
-    def __init__(self,fmt,opnode,opcode,randomization, xl, fl, ifl ,base_isa_str):
+    def __init__(self,fmt,opnode,opcode,randomization, xl, fl, ifl ,base_isa_str,inxFlag):
         '''
         This is a Constructor function which initializes various class variables
         depending on the arguments.
@@ -206,7 +206,7 @@ class Generator():
 
 
         is_nan_box = False
-        is_fext = any(['F' in x or 'D' in x for x in opnode['isa']])
+        is_fext = any(['F' in x or 'D' in x or 'Zfinx' in x for x in opnode['isa']])
 
         self.xlen = xl
         self.flen = fl
@@ -218,9 +218,10 @@ class Generator():
         self.val_vars = eval(VALS[fmt])
         self.is_fext = is_fext
         self.is_nan_box = is_nan_box
+        self.inxFlag = inxFlag
         if is_fext:
             if fl>ifl:
-                is_int_src = any([self.opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']])
+                is_int_src = any([self.opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']]) or self.inxFlag
                 is_nan_box = not is_int_src
 
         if opcode in ['sw', 'sh', 'sb', 'lw', 'lhu', 'lh', 'lb', 'lbu', 'ld', 'lwu', 'sd',"jal","beq","bge","bgeu","blt","bltu","bne","jalr","flw","fsw","fld","fsd"]:
@@ -241,6 +242,7 @@ class Generator():
             else:
                 datasets[entry] = ['x'+str(i)]
                 i+=1
+
         for entry in self.val_vars:
             key = entry+"_data"
             if key in opnode:
@@ -907,12 +909,16 @@ class Generator():
                     available_reg.remove(instr['rs1'])
                 if 'rs2' in instr and instr['rs2'] in available_reg:
                     available_reg.remove(instr['rs2'])
+                if 'rs3' in instr and instr['rs3'] in available_reg:
+                    available_reg.remove(instr['rs3'])
                 if 'rd' in instr and instr['rd'] in available_reg:
                     available_reg.remove(instr['rd'])
                 if 'rs1_hi' in instr and instr['rs1_hi'] in available_reg:
                     available_reg.remove(instr['rs1_hi'])
                 if 'rs2_hi' in instr and instr['rs2_hi'] in available_reg:
                     available_reg.remove(instr['rs2_hi'])
+                if 'rs3_hi' in instr and instr['rs3_hi'] in available_reg:
+                    available_reg.remove(instr['rs3_hi'])                    
                 if 'rd_hi' in instr and instr['rd_hi'] in available_reg:
                     available_reg.remove(instr['rd_hi'])
                 if 'swreg' in instr and instr['swreg'] in available_reg:
@@ -940,8 +946,7 @@ class Generator():
                                     dval = (instr_dict[i]['rs{0}_val'.format(j)],width)
                                 if self.is_fext:
                                     instr_dict[i]['flagreg'] = available_reg[1]
-                                instr_dict[i]['val_section'].append(
-                                        template.substitute(val=dval[0],width=dval[1]))
+                                instr_dict[i]['val_section'].append(template.substitute(val=dval[0],width=dval[1]))
                                 instr_dict[i]['load_instr'] = self.opnode['val']['load_instr']
                     available_reg = regset.copy()
                     available_reg.remove('x0')
@@ -967,8 +972,7 @@ class Generator():
                                 dval = (instr_dict[i]['rs{0}_val'.format(j)],width)
                             if self.is_fext:
                                 instr_dict[i]['flagreg'] = available_reg[1]
-                            instr_dict[i]['val_section'].append(
-                                    template.substitute(val=dval[0],width=dval[1]))
+                            instr_dict[i]['val_section'].append(template.substitute(val=dval[0],width=dval[1]))
                             instr_dict[i]['load_instr'] = self.opnode['val']['load_instr']
             return instr_dict
         else:
@@ -1024,12 +1028,16 @@ class Generator():
                 available_reg.remove(instr['rs1'])
             if 'rs2' in instr and instr['rs2'] in available_reg:
                 available_reg.remove(instr['rs2'])
+            if 'rs3' in instr and instr['rs3'] in available_reg:
+                available_reg.remove(instr['rs3'])
             if 'rd' in instr and instr['rd'] in available_reg:
                 available_reg.remove(instr['rd'])
             if 'rs1_hi' in instr and instr['rs1_hi'] in available_reg:
                 available_reg.remove(instr['rs1_hi'])
             if 'rs2_hi' in instr and instr['rs2_hi'] in available_reg:
                 available_reg.remove(instr['rs2_hi'])
+            if 'rs3_hi' in instr and instr['rs3_hi'] in available_reg:
+                available_reg.remove(instr['rs3_hi'])
             if 'rd_hi' in instr and instr['rd_hi'] in available_reg:
                 available_reg.remove(instr['rd_hi'])
             if 'testreg' in instr and instr['testreg'] in available_reg:
@@ -1098,6 +1106,10 @@ class Generator():
                 available_reg.remove(instr['rs2'])
                 if 'rs2_hi' in instr and instr['rs2_hi'] in available_reg:
                     available_reg.remove(instr['rs2_hi'])
+            if 'rs3' in instr and instr['rs3'] in available_reg:
+                available_reg.remove(instr['rs3'])
+                if 'rs3_hi' in instr and instr['rs3_hi'] in available_reg:
+                    available_reg.remove(instr['rs3_hi'])
             if 'rd' in instr and instr['rd'] in available_reg:
                 available_reg.remove(instr['rd'])
                 if 'rd_hi' in instr and instr['rd_hi'] in available_reg:
@@ -1250,7 +1262,7 @@ class Generator():
             p64_profile = self.opnode['p64_profile']
 
         n = 0
-        is_int_src = any([self.opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']])
+        is_int_src = any([self.opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']]) or self.inxFlag
         src_len = xlen if self.opcode.endswith('.x') else (32 if 'w' in self.opcode else 64)
         sz = 'word' if src_len == 32 else 'dword'
         opcode = instr_dict[0]['inst']

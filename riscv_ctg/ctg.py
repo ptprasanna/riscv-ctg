@@ -15,7 +15,7 @@ from riscv_ctg.cross_comb import cross
 from math import *
 from riscv_ctg.__init__ import __version__
 
-def create_test(usage_str, node,label,base_isa,max_inst, op_template, randomize, out_dir, xlen, flen):
+def create_test(usage_str, node,label,base_isa,max_inst, op_template, randomize, out_dir, xlen, flen, inxFlag):
     iflen = 0
     if 'mnemonics' not in node:
         logger.warning("mnemonics node not found in covergroup: " + str(label))
@@ -40,7 +40,7 @@ def create_test(usage_str, node,label,base_isa,max_inst, op_template, randomize,
         fprefix = os.path.join(out_dir,str(label))
         logger.info('Generating Test for :' + str(label) +"-" + opcode)
         formattype  = op_node['formattype']
-        gen = Generator(formattype,op_node,opcode,randomize,xlen,flen,iflen,base_isa)
+        gen = Generator(formattype,op_node,opcode,randomize,xlen,flen,iflen,base_isa,inxFlag)
         op_comb = gen.opcomb(node)
         val_comb = gen.valcomb(node)
         instr_dict = gen.correct_val(
@@ -92,7 +92,7 @@ def create_test(usage_str, node,label,base_isa,max_inst, op_template, randomize,
         logger.warning("Skipping :" + str(opcode))
         return
 
-def ctg(verbose, out, random ,xlen_arg,flen_arg, cgf_file,num_procs,base_isa, max_inst):
+def ctg(verbose, out, random ,xlen_arg,flen_arg, cgf_file,num_procs,base_isa, max_inst, inxFlag):
     logger.level(verbose)
     logger.info('****** RISC-V Compliance Test Generator {0} *******'.format(__version__ ))
     logger.info('Copyright (c) 2020, InCore Semiconductors Pvt. Ltd.')
@@ -115,9 +115,15 @@ def ctg(verbose, out, random ,xlen_arg,flen_arg, cgf_file,num_procs,base_isa, ma
     usage_str = const.usage.safe_substitute(base_isa=base_isa, \
             cgf=cgf_argument, version = __version__, time=mytime, \
             randomize=randomize_argument,xlen=str(xlen_arg))
+    # ---------------------------------
+    # IITM Changes
+    # This <inxFlag> is introduced to handle the template conflict over float instructions
+    # ---------------------------------
+    if inxFlag:
+        const.template_files.remove([fd for fd in const.template_files if "fd.yaml" in fd][0])
     op_template = utils.load_yamls(const.template_files)
     cgf = expand_cgf(cgf_file,xlen,flen)
     pool = mp.Pool(num_procs)
     results = pool.starmap(create_test, [(usage_str, node,label,base_isa,max_inst, op_template,
-        randomize, out_dir, xlen, flen) for label,node in cgf.items()])
+        randomize, out_dir, xlen, flen, inxFlag) for label,node in cgf.items()])
     pool.close()
