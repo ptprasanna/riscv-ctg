@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2022-10-20
+- Z_inx related changes are made.
+- New CLI flag is introduced for z_inx flag and it is defaulted to false. 
+- New template for inx extensions is added.
+
 ## [0.10.2] - 2022-10-20
 - Fixed use of lowercase LI.
 - Fixed correctval to ?? in comments. 
