@@ -6,6 +6,7 @@ import re
 from riscv_ctg.constants import *
 from riscv_ctg.log import logger
 from riscv_ctg.helpers import *
+from riscv_isac.InstructionObject import instructionObject
 import time
 from math import *
 import struct
@@ -208,6 +209,11 @@ class Generator():
         is_nan_box = False
         is_fext = any(['F' in x or 'D' in x or 'Zfinx' in x for x in opnode['isa']])
 
+        if is_fext:
+            if fl>ifl:
+                is_int_src = any([opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']])
+                is_nan_box = not is_int_src
+
         self.xlen = xl
         self.flen = fl
         self.iflen = ifl
@@ -218,11 +224,14 @@ class Generator():
         self.val_vars = eval(VALS[fmt])
         self.is_fext = is_fext
         self.is_nan_box = is_nan_box
+<<<<<<< HEAD
         self.inxFlag = inxFlag
         if is_fext:
             if fl>ifl:
                 is_int_src = any([self.opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']])
                 is_nan_box = not is_int_src
+=======
+>>>>>>> 0d811b41ddc6d77c6228e6dda8036bf971208e91
 
         if opcode in ['sw', 'sh', 'sb', 'lw', 'lhu', 'lh', 'lb', 'lbu', 'ld', 'lwu', 'sd',"jal","beq","bge","bgeu","blt","bltu","bne","jalr","flw","fsw","fld","fsd"]:
             self.val_vars = self.val_vars + ['ea_align']
@@ -774,6 +783,15 @@ class Generator():
 
         hits = defaultdict(lambda:set([]))
         final_instr = []
+
+        rm_dict = {
+                'rne': 0,
+                'rtz': 1,
+                'rdn': 2,
+                'rup': 3,
+                'rmm': 4,
+                'dyn': 7}
+
         def eval_inst_coverage(coverpoints,instr):
             cover_hits = {}
             var_dict = {}
@@ -791,6 +809,12 @@ class Generator():
                     var_dict[key] = int(instr[key])
             for key in self.op_vars:
                 var_dict[key] = instr[key]
+
+            instr_obj = instructionObject(None, instr['inst'], None)
+            ext_specific_vars = instr_obj.evaluate_instr_var("ext_specific_vars", {**var_dict, 'flen': self.flen, 'iflen': self.iflen}, None, {'fcsr': hex(var_dict.get('fcsr', 0))})
+            if ext_specific_vars is not None:
+                var_dict.update(ext_specific_vars)
+
             if 'val_comb' in coverpoints:
                 valcomb_hits = set([])
                 for coverpoint in coverpoints['val_comb']:
@@ -818,37 +842,34 @@ class Generator():
             return cover_hits
         i = 0
 
-        if not self.is_fext:
-            for instr in instr_dict:
-                unique = False
-                skip_val = False
-                if instr['inst'] in cgf['mnemonics']:
-                    if 'rs1' in instr and 'rs2' in instr:
-                        if instr['rs1'] == instr['rs2']:
-                            skip_val = True
-                    if 'rs1' in instr:
-                        if instr['rs1'] == 'x0' or instr['rs1'] == 'f0':
-                            skip_val = True
-                    if 'rs2' in instr:
-                        if instr['rs2'] == 'x0' or instr['rs2'] == 'f0':
-                            skip_val = True
-                    if 'rd' in instr:
-                        if instr['rd'] == 'x0' or instr['rd'] == 'f0':
-                            skip_val = True
-                    cover_hits = eval_inst_coverage(cgf,instr)
-                    for entry in cover_hits:
-                        if entry=='val_comb' and skip_val:
-                            continue
-                        over = hits[entry] & cover_hits[entry]
-                        if over != cover_hits[entry]:
-                            unique = unique or True
-                        hits[entry] |= cover_hits[entry]
-                    if unique:
-                        final_instr.append(instr)
-                    else:
-                        i+=1
-        else:
-            final_instr = instr_dict
+        for instr in instr_dict:
+            unique = False
+            skip_val = False
+            if instr['inst'] in cgf['mnemonics']:
+                if 'rs1' in instr and 'rs2' in instr:
+                    if instr['rs1'] == instr['rs2']:
+                        skip_val = True
+                if 'rs1' in instr:
+                    if instr['rs1'] == 'x0' or instr['rs1'] == 'f0':
+                        skip_val = True
+                if 'rs2' in instr:
+                    if instr['rs2'] == 'x0' or instr['rs2'] == 'f0':
+                        skip_val = True
+                if 'rd' in instr:
+                    if instr['rd'] == 'x0' or instr['rd'] == 'f0':
+                        skip_val = True
+                cover_hits = eval_inst_coverage(cgf,instr)
+                for entry in cover_hits:
+                    if entry=='val_comb' and skip_val:
+                        continue
+                    over = hits[entry] & cover_hits[entry]
+                    if over != cover_hits[entry]:
+                        unique = unique or True
+                    hits[entry] |= cover_hits[entry]
+                if unique:
+                    final_instr.append(instr)
+                else:
+                    i+=1
 
         if any('IP' in isa for isa in self.opnode['isa']):
             if 'p64_profile' in self.opnode:
@@ -1319,8 +1340,8 @@ class Generator():
         sign.append(signode_template.substitute({'n':n,
                 'label':"signature_"+sreg+"_"+str(regs[sreg]),'sz':sig_sz}))
         test = part_template.safe_substitute(case_str=case_str,code='\n'.join(code))
-        sign.append("#ifdef rvtest_mtrap_routine\n"+signode_template.substitute(
-            {'n':64,'label':"mtrap_sigptr",'sz':'XLEN/32'})+"\n#endif\n")
+        sign.append("#ifdef rvtest_mtrap_routine\ntsig_begin_canary:\nCANARY;\n"+signode_template.substitute(
+            {'n':64,'label':"mtrap_sigptr",'sz':'XLEN/32'})+"\ntsig_end_canary:\nCANARY;\n#endif\n")
         sign.append("#ifdef rvtest_gpr_save\n"+signode_template.substitute(
             {'n':32,'label':"gpr_save",'sz':'XLEN/32'})+"\n#endif\n")
         with open(file_name,"w") as fd:
