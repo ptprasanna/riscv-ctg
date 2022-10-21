@@ -221,7 +221,7 @@ class Generator():
         self.inxFlag = inxFlag
         if is_fext:
             if fl>ifl:
-                is_int_src = any([self.opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']]) or self.inxFlag
+                is_int_src = any([self.opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']])
                 is_nan_box = not is_int_src
 
         if opcode in ['sw', 'sh', 'sb', 'lw', 'lhu', 'lh', 'lb', 'lbu', 'ld', 'lwu', 'sd',"jal","beq","bge","bgeu","blt","bltu","bne","jalr","flw","fsw","fld","fsd"]:

@@ -101,8 +101,8 @@
 #endif
 
 #if ZFINX==1
-  #define FLREG lw
-  #define FSREG sw
+  #define FLREG LREG
+  #define FSREG SREG
   #define FREGWIDTH 4
   #define FLEN 32
   #if XLEN==64
@@ -111,9 +111,9 @@
       #define SIGALIGN 4
   #endif
 #elif ZDINX==1
-  #define FLREG lw
-  #define FSREG sw
-  #define FREGWIDTH 4
+  #define FLREG LREG
+  #define FSREG SREG
+  #define FREGWIDTH 8
   #define FLEN 64
   #if XLEN==64
     #define SIGALIGN 8
