@@ -224,14 +224,6 @@ class Generator():
         self.val_vars = eval(VALS[fmt])
         self.is_fext = is_fext
         self.is_nan_box = is_nan_box
-<<<<<<< HEAD
-        self.inxFlag = inxFlag
-        if is_fext:
-            if fl>ifl:
-                is_int_src = any([self.opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']])
-                is_nan_box = not is_int_src
-=======
->>>>>>> 0d811b41ddc6d77c6228e6dda8036bf971208e91
 
         if opcode in ['sw', 'sh', 'sb', 'lw', 'lhu', 'lh', 'lb', 'lbu', 'ld', 'lwu', 'sd',"jal","beq","bge","bgeu","blt","bltu","bne","jalr","flw","fsw","fld","fsd"]:
             self.val_vars = self.val_vars + ['ea_align']
