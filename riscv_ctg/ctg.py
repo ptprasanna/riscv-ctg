@@ -121,6 +121,9 @@ def ctg(verbose, out, random ,xlen_arg,flen_arg, cgf_file,num_procs,base_isa, ma
     # ---------------------------------
     if inxFlag:
         const.template_files.remove([fd for fd in const.template_files if "fd.yaml" in fd][0])
+    else:
+        const.template_files.remove([fd for fd in const.template_files if "inx.yaml" in fd][0])
+
     op_template = utils.load_yamls(const.template_files)
     cgf = expand_cgf(cgf_file,xlen,flen)
     pool = mp.Pool(num_procs)
