@@ -105,3 +105,4 @@ ENV/
 .vscode/
 
 work/*
+riscv_ctg/main_dbg.py
