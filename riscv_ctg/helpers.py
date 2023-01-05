@@ -48,10 +48,14 @@ def extract_frs_fields(reg,cvp,iflen):
     hex_val1 = '0x' + size_string.format(int(bin_val1, 2))
     return int(hex_val1,16)
 
-def merge_fields_f(val_vars,cvp,flen,iflen,merge):
+def merge_fields_f(val_vars,cvp,flen,iflen,merge,inxFlag=False):
     nan_box = False
+    sgn_extd = False
     if flen > iflen:
-        nan_box = True
+        if inxFlag:
+            sgn_extd = True
+        else:
+            nan_box = True
     fdict = {}
     for var in val_vars:
         if var in num_dict and merge:
@@ -64,6 +68,14 @@ def merge_fields_f(val_vars,cvp,flen,iflen,merge):
                     fdict[nan_var] = eval(match_obj.group(nan_var))
                 else:
                     fdict[nan_var] = (2**(flen-iflen))-1
+            elif sgn_extd:
+                sgn_var = 'rs{0}_sgn_prefix'.format(num_dict[var])
+                regex = val_regex.format(sgn_var.replace("_","\\_"),sgn_var)
+                match_obj = re.search(regex,cvp)
+                if match_obj is not None:
+                    fdict[sgn_var] = eval(match_obj.group(sgn_var))
+                else:
+                    fdict[sgn_var] = (2**(flen-iflen))-1
         else:
             regex = val_regex.format(var.replace("_","\\_"),var)
             match_obj = re.search(regex,cvp)

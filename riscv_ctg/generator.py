@@ -26,8 +26,8 @@ twos_xlen = lambda x: twos(x,xlen)
 
 def get_rm(opcode):
     if any([x in opcode for x in
-        ['fsgnj','fle','flt','feq','fclass','fmv','flw','fsw','fld','fsd','fmin','fmax',
-            'fcvt.d.s', 'fcvt.d.w','fcvt.d.wu']]):
+        ['fsgnj','fle','flt','feq','fclass','fmv','flw','fsw','fld','fsd','fmin','fmax']]):
+            # ,'fcvt.d.s', 'fcvt.d.w','fcvt.d.wu']]):
         return []
     else:
         return ['rm_val']
@@ -77,9 +77,11 @@ OPS = {
 
 VALS = {
     'rformat': "['rs1_val', 'rs2_val'] + ((get_rm(opcode)+['fcsr']) if is_fext else []) + \
-        ([] if not is_nan_box else ['rs{0}_nan_prefix'.format(x) for x in range(1,3)])",
+        ([] if not is_nan_box else ['rs{0}_nan_prefix'.format(x) for x in range(1,3)]) + \
+        (['rs{0}_sgn_prefix'.format(x) for x in range(1,3)] if is_sgn_extd else [])",
     'r4format': "['rs1_val', 'rs2_val', 'rs3_val'] + (['rm_val','fcsr'] if is_fext else []) + \
-        ([] if not is_nan_box else ['rs{0}_nan_prefix'.format(x) for x in range(1,4)])",
+        ([] if not is_nan_box else ['rs{0}_nan_prefix'.format(x) for x in range(1,4)]) + \
+        (['rs{0}_sgn_prefix'.format(x) for x in range(1,4)] if is_sgn_extd else [])",
     'iformat': "['rs1_val', 'imm_val'] + ([] if not is_fext else ['fcsr'])",
     'sformat': "['rs1_val', 'rs2_val', 'imm_val'] + ([] if not is_fext else ['fcsr'])",
     'bsformat': "['rs1_val', 'rs2_val', 'imm_val']",
@@ -99,7 +101,8 @@ VALS = {
     'kformat': "['rs1_val']",
     # 'frformat': "['rs1_val', 'rs2_val', 'rm_val', 'fcsr']",
     'fsrformat': "['rs1_val', 'fcsr'] + get_rm(opcode) + \
-        ([] if not is_nan_box else ['rs1_nan_prefix'])",
+        ([] if not is_nan_box else ['rs1_nan_prefix']) + \
+        (['rs1_sgn_prefix'] if is_sgn_extd else [])",
     # 'fr4format': "['rs1_val', 'rs2_val', 'rs3_val', 'rm_val', 'fcsr']",
     'pbrrformat': 'simd_val_vars("rs1", xlen, 8) + simd_val_vars("rs2", xlen, 8)',
     'phrrformat': 'simd_val_vars("rs1", xlen, 16) + simd_val_vars("rs2", xlen, 16)',
@@ -207,12 +210,13 @@ class Generator():
 
 
         is_nan_box = False
-        is_fext = any(['F' in x or 'D' in x or 'Zfinx' in x for x in opnode['isa']])
+        is_fext = any(['F' in x or 'D' in x or 'Zfinx' or 'Zdinx' or 'Zhinx' in x for x in opnode['isa']])
+        is_sgn_extd = True if (inxFlag and iflen < xlen) else False
 
         if is_fext:
             if fl>ifl:
                 is_int_src = any([opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']])
-                is_nan_box = not is_int_src
+                is_nan_box = not is_int_src and not is_sgn_extd
 
         self.xlen = xl
         self.flen = fl
@@ -224,6 +228,8 @@ class Generator():
         self.val_vars = eval(VALS[fmt])
         self.is_fext = is_fext
         self.is_nan_box = is_nan_box
+        self.inxFlag = inxFlag
+        self.is_sgn_extd = is_sgn_extd
 
         if opcode in ['sw', 'sh', 'sb', 'lw', 'lhu', 'lh', 'lb', 'lbu', 'ld', 'lwu', 'sd',"jal","beq","bge","bgeu","blt","bltu","bne","jalr","flw","fsw","fld","fsd"]:
             self.val_vars = self.val_vars + ['ea_align']
@@ -390,7 +396,7 @@ class Generator():
                 if self.is_fext:
 	                # fs + fe + fm -> Combiner Script
                     try:
-                        d = merge_fields_f(self.val_vars,req_val_comb,self.flen,self.iflen,merge)
+                        d = merge_fields_f(self.val_vars,req_val_comb,self.flen,self.iflen,merge,self.inxFlag)
                     except ExtractException as e:
                         logger.warning("Valcomb skip: "+str(e))
                         continue
@@ -803,7 +809,8 @@ class Generator():
                 var_dict[key] = instr[key]
 
             instr_obj = instructionObject(None, instr['inst'], None)
-            ext_specific_vars = instr_obj.evaluate_instr_var("ext_specific_vars", {**var_dict, 'flen': self.flen, 'iflen': self.iflen}, None, {'fcsr': hex(var_dict.get('fcsr', 0))})
+            ext_specific_vars = instr_obj.evaluate_instr_var("ext_specific_vars", {**var_dict, 'flen': self.flen, \
+                'iflen': self.iflen, 'inxFlag': self.inxFlag, 'xlen': self.xlen}, None, {'fcsr': hex(var_dict.get('fcsr', 0))})
             if ext_specific_vars is not None:
                 var_dict.update(ext_specific_vars)
 
@@ -955,6 +962,8 @@ class Generator():
                                 if self.is_nan_box:
                                     dval = nan_box(instr_dict[i]['rs{0}_nan_prefix'.format(j)],
                                             instr_dict[i]['rs{0}_val'.format(j)],self.flen,self.iflen)
+                                elif self.is_sgn_extd:
+                                    dval = (instr_dict[i]['rs{0}_sgn_prefix'.format(j)],width)
                                 else:
                                     dval = (instr_dict[i]['rs{0}_val'.format(j)],width)
                                 if self.is_fext:

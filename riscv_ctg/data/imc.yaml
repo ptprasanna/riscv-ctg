@@ -1876,4 +1876,3 @@ c.jalr:
     // $comment
     // opcode:c.jalr; op1:$rs1
     TEST_CJALR_OP($testreg, $rs1, $swreg, $offset)
-

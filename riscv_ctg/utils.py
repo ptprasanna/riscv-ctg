@@ -62,6 +62,7 @@ def get_instr_list():
 
 def load_yamls(foo):
     with combineReader(foo) as fp:
+        print(foo)
         return dict(yaml.load(fp))
 
 class makeUtil():

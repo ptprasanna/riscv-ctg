@@ -1708,4 +1708,3 @@ fcvt.s.lu:
     val_offset:$val_offset; rmval:$rm_val; correctval:??; testreg:$testreg;
     fcsr_val: $fcsr*/
     TEST_FPIO_OP($inst, $rd, $rs1, $rm_val, $fcsr, $correctval, $valaddr_reg, $val_offset, $flagreg, $swreg, $testreg,$load_instr)
- 

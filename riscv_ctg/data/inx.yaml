@@ -49,9 +49,9 @@ fadd.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -108,9 +108,9 @@ fsub.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -167,9 +167,9 @@ fmul.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -226,9 +226,9 @@ fdiv.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -240,7 +240,7 @@ fdiv.d:
     
 fsqrt.s:
   sig:
-    stride: 2
+    stride: 1
     sz: 'SIGALIGN'
   val:
     stride: 1
@@ -268,11 +268,11 @@ fsqrt.s:
     
 fsqrt.d:
   sig:
-    stride: 2
+    stride: 1
     sz: 'SIGALIGN'
   val:
     stride: 1
-    sz: 'FLEN/8'
+    sz: 'FLEN/4'
     val_template: "'NAN_BOXED($val,$width,FLEN)'"
     load_instr: "LREG"
   xlen: [32,64]
@@ -283,8 +283,8 @@ fsqrt.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -340,10 +340,10 @@ fmadd.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'r4format'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rs3_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rs3_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -399,10 +399,10 @@ fmsub.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'r4format'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rs3_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rs3_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -458,10 +458,10 @@ fnmadd.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'r4format'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rs3_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rs3_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -517,10 +517,10 @@ fnmsub.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'r4format'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rs3_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rs3_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -574,9 +574,9 @@ fsgnj.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -631,9 +631,9 @@ fsgnjn.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -688,9 +688,9 @@ fsgnjx.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -745,9 +745,9 @@ fmin.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -802,9 +802,9 @@ fmax.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -857,9 +857,9 @@ feq.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; op2:$rs2; dest:$rd; op1val:$rs1_val; op2val:$rs2_val;
@@ -910,9 +910,9 @@ flt.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; op2:$rs2; dest:$rd; op1val:$rs1_val; op2val:$rs2_val;
@@ -963,9 +963,9 @@ fle.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'rformat'
-  rs1_op_data: *all_regs
-  rs2_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rs2_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; op2:$rs2; dest:$rd; op1val:$rs1_val; op2val:$rs2_val;
@@ -1017,8 +1017,8 @@ fcvt.w.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1070,8 +1070,8 @@ fcvt.wu.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1096,8 +1096,8 @@ fcvt.l.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1122,8 +1122,8 @@ fcvt.lu.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1148,8 +1148,8 @@ fcvt.s.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -1163,20 +1163,20 @@ fcvt.d.s:
     stride: 2
     sz: 'SIGALIGN'
   val:
-    stride: 1
+    stride: 2
     sz: 'FLEN/8'
     val_template: "'NAN_BOXED($val,$width,FLEN)'"
     load_instr: "LREG"
   xlen: [32,64]
   isa: 
     - I_Zdinx
-  flen: [64]
+  flen: [32,64]
   rm_val_data: '[7,0,1,2,3,4]'
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
 
     // $comment
@@ -1256,8 +1256,8 @@ fcvt.d.w:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1282,8 +1282,8 @@ fcvt.d.wu:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1308,8 +1308,8 @@ fcvt.d.l:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1334,8 +1334,8 @@ fcvt.d.lu:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1370,7 +1370,7 @@ fmv.d.x:
     
 fclass.s:
   sig:
-    stride: 2
+    stride: 1
     sz: 'SIGALIGN'
   val:
     stride: 1
@@ -1396,7 +1396,7 @@ fclass.s:
    
 fclass.d:
   sig:
-    stride: 2
+    stride: 1
     sz: 'SIGALIGN'
   val:
     stride: 1
@@ -1410,8 +1410,8 @@ fclass.d:
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_regs
+  rs1_op_data: *pair_regs
+  rd_op_data: *pair_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
@@ -1515,7 +1515,7 @@ fcvt.s.lu:
   xlen: [64]
   isa: 
     - I_Zfinx
-    - I_Zdinx
+    - I_Zdinxz
   flen: [32,64]
   rm_val_data: '[7,0,1,2,3,4]'
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
@@ -1528,5 +1528,3 @@ fcvt.s.lu:
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
     val_offset:$val_offset; rmval:$rm_val; correctval:$correctval; testreg:$testreg;
     fcsr_val: $fcsr*/
-    TEST_FPIO_OP($inst, $rd, $rs1, $rm_val, $fcsr, $correctval, $valaddr_reg, $val_offset, $flagreg, $swreg, $testreg,$load_instr)
- 

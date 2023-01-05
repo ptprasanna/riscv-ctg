@@ -70,6 +70,8 @@
   #define LREGWU lwu
   #define REGWIDTH 8
   #define MASK 0xFFFFFFFFFFFFFFFF
+  #define CANARY \
+      .dword 0x6F5CA309E7D4B281
 
 #else 
   #if XLEN==32
@@ -78,6 +80,8 @@
     #define LREGWU lw
     #define REGWIDTH 4
   #define MASK 0xFFFFFFFF
+  #define CANARY \
+      .word 0x6F5CA309
 
   #endif
 #endif
@@ -989,7 +993,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
 #define TEST_FPSR_OP( inst, destreg, freg, rm, fcsr_val, correctval, valaddr_reg, val_offset, flagreg, swreg, testreg) \
     TEST_CASE_F(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg, val_offset, testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg, rm; \
       csrr flagreg, fcsr      ; \
     )
@@ -999,7 +1003,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
 #define TEST_FPSR_OP_NRM( inst, destreg, freg, fcsr_val, correctval, valaddr_reg, val_offset, flagreg, swreg, testreg) \
     TEST_CASE_F(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg, val_offset, testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg; \
       csrr flagreg, fcsr      ; \
     )
@@ -1008,7 +1012,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
 #define TEST_FPID_OP( inst, destreg, freg, rm, fcsr_val, correctval, valaddr_reg, val_offset, flagreg, swreg, testreg,load_instr) \
     TEST_CASE_FID(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(load_instr, valaddr_reg, freg, val_offset, testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg, rm; \
       csrr flagreg, fcsr      ; \
       )
@@ -1017,7 +1021,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
 #define TEST_FPIO_OP( inst, destreg, freg, rm, fcsr_val, correctval, valaddr_reg, val_offset, flagreg, swreg, testreg, load_instr) \
     TEST_CASE_F(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(load_instr, valaddr_reg, freg, val_offset, testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg, rm; \
       csrr flagreg, fcsr; \
     )
@@ -1027,7 +1031,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
 #define TEST_FPID_OP_NRM( inst, destreg, freg, fcsr_val, correctval, valaddr_reg, val_offset, flagreg, swreg, testreg) \
     TEST_CASE_FID(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg, val_offset, testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg; \
       csrr flagreg, fcsr      ; \
       )
@@ -1037,7 +1041,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
 #define TEST_FPIO_OP_NRM( inst, destreg, freg, fcsr_val, correctval, valaddr_reg, val_offset, flagreg, swreg, testreg, load_instr) \
     TEST_CASE_F(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(load_instr, valaddr_reg, freg, val_offset, testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg; \
       csrr flagreg, fcsr; \
     )
@@ -1051,11 +1055,11 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
     )
 
 //Tests for a instructions with register-register operand
-#define TEST_RI_OP(inst, destreg, reg2, imm, correctval, val1, val2, swreg, offset, testreg) \
+#define TEST_RI_OP(inst, destreg, reg1, reg2, imm, correctval, val1, val2, swreg, offset, testreg) \
     TEST_CASE(testreg, destreg, correctval, swreg, offset, \
-      LI(destreg, MASK_XLEN(val1)); \
+      LI(reg1, MASK_XLEN(val1)); \
       LI(reg2, MASK_XLEN(val2)); \
-      inst destreg, reg2, imm; \
+      inst destreg, reg1, reg2, imm; \
     )
 
 //Tests for a instructions with register-register operand
@@ -1071,7 +1075,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
     TEST_CASE_F(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg1, val_offset, testreg); \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg2, (val_offset+FREGWIDTH), testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg1, freg2; \
       csrr flagreg, fcsr; \
     )
@@ -1081,8 +1085,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
     TEST_CASE_F(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg1, val_offset, testreg); \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg2, (val_offset+FREGWIDTH), testreg); \
-      LI(testreg, fcsr_val); \
-      csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg1, freg2, rm; \
       csrr flagreg, fcsr; \
     )
@@ -1092,7 +1095,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
     TEST_CASE_FID(testreg, destreg, correctval, swreg, flagreg, \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg1, val_offset, testreg); \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg2, (val_offset+FREGWIDTH), testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg1, freg2; \
       csrr flagreg, fcsr      ; \
     )
@@ -1103,7 +1106,7 @@ RVTEST_SIGUPD_F(swreg,destreg,flagreg)
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg1, val_offset, testreg); \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg2, (val_offset+FREGWIDTH), testreg); \
       LOAD_MEM_VAL(FLREG, valaddr_reg, freg3, (val_offset+2*FREGWIDTH), testreg); \
-      LI(testreg, fcsr_val); csrw fcsr, testreg; \
+      li testreg, fcsr_val; csrw fcsr, testreg; \
       inst destreg, freg1, freg2, freg3, rm; \
       csrr flagreg, fcsr      ; \
     )
