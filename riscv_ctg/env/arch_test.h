@@ -90,7 +90,7 @@
   #define FLREG fld
   #define FSREG fsd
   #define FREGWIDTH 8
-  #define SIGALIGN 8
+
 #else 
   #if FLEN==32
     #define FLREG flw
@@ -140,11 +140,13 @@
 #endif
 
 #define NAN_BOXED(__val__,__width__,__max__)    \
-    .if __width__ == 32                        ;\
+    #if __width__ == 32                        ;\
         .word __val__                          ;\
-    .else                                      ;\
+    #elif __width__ == 16                      ;\            ;\
+        .word __val__                          ;\
+    #else                                      ;\
         .dword __val__                         ;\
-    .endif                                     ;\
+    #endif                                     ;\
     .if __max__ > __width__                    ;\
         .set pref_bytes,(__max__-__width__)/32 ;\
     .else                                      ;\

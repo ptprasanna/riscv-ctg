@@ -1,17 +1,18 @@
 # See LICENSE.incore for details
+import itertools
 import random
-from collections import defaultdict
-from constraint import *
 import re
-from riscv_ctg.constants import *
-from riscv_ctg.log import logger
-from riscv_ctg.helpers import *
-from riscv_isac.InstructionObject import instructionObject
-import time
-from math import *
 import struct
 import sys
-import itertools
+import time
+from collections import defaultdict
+from math import *
+
+from constraint import *
+from riscv_ctg.constants import *
+from riscv_ctg.helpers import *
+from riscv_ctg.log import logger
+from riscv_isac.InstructionObject import instructionObject
 
 one_operand_finstructions = ["fsqrt.s","fmv.x.w","fcvt.wu.s","fcvt.w.s","fclass.s","fcvt.l.s","fcvt.lu.s","fcvt.s.l","fcvt.s.lu"]
 two_operand_finstructions = ["fadd.s","fsub.s","fmul.s","fdiv.s","fmax.s","fmin.s","feq.s","flt.s","fle.s","fsgnj.s","fsgnjn.s","fsgnjx.s"]
@@ -20,6 +21,10 @@ three_operand_finstructions = ["fmadd.s","fmsub.s","fnmadd.s","fnmsub.s"]
 one_operand_dinstructions = ["fsqrt.d","fclass.d","fcvt.w.d","fcvt.wu.d","fcvt.d.w","fcvt.d.wu","fcvt.d.s","fcvt.s.d"]
 two_operand_dinstructions = ["fadd.d","fsub.d","fmul.d","fdiv.d","fmax.d","fmin.d","feq.d","flt.d","fle.d","fsgnj.d","fsgnjn.d","fsgnjx.d"]
 three_operand_dinstructions = ["fmadd.d","fmsub.d","fnmadd.d","fnmsub.d"]
+
+one_operand_hinstructions = ["fsqrt.h","fclass.h","fcvt.w.h","fcvt.wu.h","fcvt.h.w","fcvt.h.wu"]
+two_operand_hinstructions = ["fadd.h","fsub.h","fmul.h","fdiv.h","fmax.h","fmin.h","feq.h","flt.h","fle.h","fsgnj.h","fsgnjn.h","fsgnjx.h"]
+three_operand_hinstructions = ["fmadd.h","fmsub.h","fnmadd.h","fnmsub.h"]
 from riscv_ctg.dsp_function import *
 
 twos_xlen = lambda x: twos(x,xlen)
@@ -210,7 +215,7 @@ class Generator():
 
 
         is_nan_box = False
-        is_fext = any(['F' in x or 'D' in x or 'Zfinx' in x or 'Zdinx' in x or 'Zhinx' in x for x in opnode['isa']])
+        is_fext = any(['F' in x or 'D' in x  or 'Zfh' in x or 'Zfinx' in x or 'Zdinx' in x or 'Zhinx' in x for x in opnode['isa']])
         is_sgn_extd = True if (inxFlag and iflen < xlen) else False
 
         if is_fext:
@@ -231,7 +236,7 @@ class Generator():
         self.inxFlag = inxFlag
         self.is_sgn_extd = is_sgn_extd
 
-        if opcode in ['sw', 'sh', 'sb', 'lw', 'lhu', 'lh', 'lb', 'lbu', 'ld', 'lwu', 'sd',"jal","beq","bge","bgeu","blt","bltu","bne","jalr","flw","fsw","fld","fsd"]:
+        if opcode in ['sw', 'sh', 'sb', 'lw', 'lhu', 'lh', 'lb', 'lbu', 'ld', 'lwu', 'sd',"jal","beq","bge","bgeu","blt","bltu","bne","jalr","flw","fsw","fld","fsd","flh","fsh"]:
             self.val_vars = self.val_vars + ['ea_align']
         self.template = opnode['template']
         self.opnode = opnode
@@ -807,12 +812,17 @@ class Generator():
                     var_dict[key] = int(instr[key])
             for key in self.op_vars:
                 var_dict[key] = instr[key]
+              
+
 
             instr_obj = instructionObject(None, instr['inst'], None)
             ext_specific_vars = instr_obj.evaluate_instr_var("ext_specific_vars", {**var_dict, 'flen': self.flen, \
                 'iflen': self.iflen, 'inxFlag': self.inxFlag, 'xlen': self.xlen}, None, {'fcsr': hex(var_dict.get('fcsr', 0))})
+          
             if ext_specific_vars is not None:
                 var_dict.update(ext_specific_vars)
+                
+               
 
             if 'val_comb' in coverpoints:
                 valcomb_hits = set([])
@@ -838,10 +848,12 @@ class Generator():
             if 'rd' in coverpoints:
                 if var_dict['rd'] in coverpoints['rd']:
                     cover_hits['rd'] = set([var_dict['rd']])
+           
             return cover_hits
         i = 0
 
         for instr in instr_dict:
+          
             unique = False
             skip_val = False
             if instr['inst'] in cgf['mnemonics']:
@@ -858,9 +870,10 @@ class Generator():
                     if instr['rd'] == 'x0' or instr['rd'] == 'f0':
                         skip_val = True
                 cover_hits = eval_inst_coverage(cgf,instr)
+                
                 for entry in cover_hits:
                     if entry=='val_comb' and skip_val:
-                        continue
+                       continue
                     over = hits[entry] & cover_hits[entry]
                     if over != cover_hits[entry]:
                         unique = unique or True
@@ -873,9 +886,10 @@ class Generator():
         if any('IP' in isa for isa in self.opnode['isa']):
             if 'p64_profile' in self.opnode:
                 gen_pair_reg_data(final_instr, self.xlen, self.opnode['bit_width'], self.opnode['p64_profile'])
+                
             elif 'bit_width' in self.opnode:
                 concat_simd_data(final_instr, self.xlen, self.opnode['bit_width'])
-
+      
         return final_instr
 
     def valreg(self,instr_dict):
@@ -997,6 +1011,7 @@ class Generator():
                             instr_dict[i]['val_section'].append(template.substitute(val=dval[0],width=dval[1]))
                             instr_dict[i]['load_instr'] = self.opnode['val']['load_instr']
             return instr_dict
+            
         else:
             return instr_dict
 
@@ -1089,6 +1104,7 @@ class Generator():
                     if offset*stride_sz > 2047:
                         offset = 0
                     instr_dict[i]['swreg'] = curr_swreg
+        
         return instr_dict
 
     def testreg(self, instr_dict):
@@ -1107,6 +1123,7 @@ class Generator():
         :type instr_dict: list
         :return: list of dictionaries containing the various values necessary for the macro
         '''
+        
         regset = e_regset if 'e' in self.base_isa else default_regset
         total_instr = len(instr_dict)
         available_reg = regset.copy()
@@ -1153,6 +1170,7 @@ class Generator():
             for i in range(len(instr_dict)):
                 if 'testreg' not in instr_dict[i]:
                     instr_dict[i]['testreg'] = curr_testreg
+       
         return instr_dict
 
     def correct_val(self,instr_dict):
@@ -1187,6 +1205,7 @@ class Generator():
         else:
             for i in range(len(instr_dict)):
                 instr_dict[i]['correctval'] = '0x' + '0'.zfill(int(self.xlen/4))
+        
         return instr_dict
 
     def reformat_instr(self, instr_dict):
@@ -1224,6 +1243,7 @@ class Generator():
                         value = int(value)
 #                    value = '0x' + struct.pack(size,value).hex()
                     instr_dict[i][field] = hex(value)
+      
         return instr_dict
 
     def write_test(self, fprefix, node, label, instr_dict, op_node, usage_str,max_inst):
@@ -1231,7 +1251,7 @@ class Generator():
         total = len(instr_dict)
         end = len(instr_dict)
         if max_inst:
-            end = max_inst
+           end = max_inst
         else:
             max_inst = total
         i = 1
@@ -1299,7 +1319,8 @@ class Generator():
         op_node_isa = op_node_isa.replace("I","E") if 'e' in self.base_isa else op_node_isa
         extension = op_node_isa.replace('I',"").replace('E',"")
         count = 0
-        neg_offset = 0
+        k = 0
+        neg_offset = 0	
         width = self.iflen if not self.is_nan_box else self.flen
         dset_n = 0
         sig_sz = '(({0})/4)'.format(self.opnode['sig']['sz'])

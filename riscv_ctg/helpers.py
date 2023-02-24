@@ -19,16 +19,20 @@ def to_int(x):
         return int(x)
 
 def nan_box(prefix,rs,flen,iflen):
+   
     if int(prefix) == ((2**(flen-iflen))-1):
         return (rs,iflen)
     else:
         return (str(to_int(rs)|(to_int(prefix)<<iflen)),flen)
 
 def extract_frs_fields(reg,cvp,iflen):
-    if (iflen == 32):
+    if (iflen == 16):
+        e_sz = 5
+        m_sz = 10
+    elif (iflen == 32):
         e_sz = 8
         m_sz = 23
-    else:
+    elif (iflen == 64):
         e_sz = 11
         m_sz = 52
     s_sz_string = '{:01b}'
@@ -83,6 +87,7 @@ def merge_fields_f(val_vars,cvp,flen,iflen,merge,inxFlag=False):
                 fdict[var] = eval(match_obj.group(var))
             elif 'nan_prefix' not in var:
                 raise ExtractException("{0} not defined in coverpoint:{1}".format(var,cvp))
+   
     return fdict
 
 
