@@ -215,8 +215,7 @@ class Generator():
 
 
         is_nan_box = False
-        is_fext = any(['F' in x or 'D' in x  or 'Zfh' in x or 'Zfinx' in x or 'Zdinx' in x or 'Zhinx' in x for x in opnode['isa']])
-        is_sgn_extd = True if (inxFlag and iflen < xlen) else False
+        is_fext = any(['F' in x or 'D' in x for x in opnode['isa']])
 
         if is_fext:
             if fl>ifl:
@@ -816,9 +815,7 @@ class Generator():
 
 
             instr_obj = instructionObject(None, instr['inst'], None)
-            ext_specific_vars = instr_obj.evaluate_instr_var("ext_specific_vars", {**var_dict, 'flen': self.flen, \
-                'iflen': self.iflen, 'inxFlag': self.inxFlag, 'xlen': self.xlen}, None, {'fcsr': hex(var_dict.get('fcsr', 0))})
-          
+            ext_specific_vars = instr_obj.evaluate_instr_var("ext_specific_vars", {**var_dict, 'flen': self.flen, 'iflen': self.iflen}, None, {'fcsr': hex(var_dict.get('fcsr', 0))})
             if ext_specific_vars is not None:
                 var_dict.update(ext_specific_vars)
                 
