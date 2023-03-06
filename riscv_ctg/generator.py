@@ -215,8 +215,9 @@ class Generator():
 
 
         is_nan_box = False
-        is_fext = any(['F' in x or 'D' in x for x in opnode['isa']])
-
+        is_fext = any(['F' in x or 'D' in x or 'Zfh' in x or 'Zfinx' in x for x in opnode['isa']])
+        is_sgn_extd = True if (inxFlag and iflen < xlen) else False
+        
         if is_fext:
             if fl>ifl:
                 is_int_src = any([opcode.endswith(x) for x in ['.x','.w','.l','.wu','.lu']])
@@ -815,7 +816,7 @@ class Generator():
 
 
             instr_obj = instructionObject(None, instr['inst'], None)
-            ext_specific_vars = instr_obj.evaluate_instr_var("ext_specific_vars", {**var_dict, 'flen': self.flen, 'iflen': self.iflen}, None, {'fcsr': hex(var_dict.get('fcsr', 0))})
+            ext_specific_vars = instr_obj.evaluate_instr_var("ext_specific_vars", {**var_dict, 'flen': self.flen, 'iflen': self.iflen, 'inxFlag': self.inxFlag, 'xlen': self.xlen}, None, {'fcsr': hex(var_dict.get('fcsr', 0))})
             if ext_specific_vars is not None:
                 var_dict.update(ext_specific_vars)
                 
@@ -1316,7 +1317,6 @@ class Generator():
         op_node_isa = op_node_isa.replace("I","E") if 'e' in self.base_isa else op_node_isa
         extension = op_node_isa.replace('I',"").replace('E',"")
         count = 0
-        k = 0
         neg_offset = 0	
         width = self.iflen if not self.is_nan_box else self.flen
         dset_n = 0

@@ -32,7 +32,7 @@ def extract_frs_fields(reg,cvp,iflen):
     elif (iflen == 32):
         e_sz = 8
         m_sz = 23
-    elif (iflen == 64):
+    else:
         e_sz = 11
         m_sz = 52
     s_sz_string = '{:01b}'
