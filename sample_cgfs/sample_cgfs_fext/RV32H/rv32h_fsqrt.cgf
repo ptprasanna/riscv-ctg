@@ -104,3 +104,33 @@ fsqrt_b8:
     val_comb:
       abstract_comb:
         'ibm_b8(flen,16, "fsqrt.h", 1)': 0
+        
+fsqrt_b9:
+    config: 
+      - check ISA:=regex(.*I.*F.*Zfh.*)
+    opcode: 
+      fsqrt.h: 0
+    rs1: 
+      <<: *all_fregs
+    rd: 
+      <<: *all_fregs
+    op_comb: 
+      <<: *ifmt_op_comb
+    val_comb:
+      abstract_comb:
+        'ibm_b9(flen,16, "fsqrt.h", 1)': 0
+
+fsqrt_b20:
+    config: 
+      - check ISA:=regex(.*I.*F.*Zfh.*)
+    opcode: 
+      fsqrt.h: 0
+    rs1: 
+      <<: *all_fregs
+    rd: 
+      <<: *all_fregs
+    op_comb: 
+      <<: *ifmt_op_comb
+    val_comb:
+      abstract_comb:
+        'ibm_b20(flen,16, "fsqrt.h", 1)': 0
