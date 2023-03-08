@@ -22,7 +22,7 @@ one_operand_dinstructions = ["fsqrt.d","fclass.d","fcvt.w.d","fcvt.wu.d","fcvt.d
 two_operand_dinstructions = ["fadd.d","fsub.d","fmul.d","fdiv.d","fmax.d","fmin.d","feq.d","flt.d","fle.d","fsgnj.d","fsgnjn.d","fsgnjx.d"]
 three_operand_dinstructions = ["fmadd.d","fmsub.d","fnmadd.d","fnmsub.d"]
 
-one_operand_hinstructions = ["fsqrt.h","fclass.h","fcvt.w.h","fcvt.wu.h","fcvt.h.w","fcvt.h.wu"]
+one_operand_hinstructions = ["fsqrt.h","fclass.h","fcvt.w.h","fcvt.wu.h","fcvt.h.w","fcvt.h.wu","fcvt.h.l","fcvt.h.lu","fcvt.l.h","fcvt.d.h","fcvt.h.d","fcvt.s.h","fcvt.s.h"]
 two_operand_hinstructions = ["fadd.h","fsub.h","fmul.h","fdiv.h","fmax.h","fmin.h","feq.h","flt.h","fle.h","fsgnj.h","fsgnjn.h","fsgnjx.h"]
 three_operand_hinstructions = ["fmadd.h","fmsub.h","fnmadd.h","fnmsub.h"]
 from riscv_ctg.dsp_function import *
@@ -216,7 +216,7 @@ class Generator():
 
         is_nan_box = False
         is_fext = any(['F' in x or 'D' in x or 'Zfh' in x or 'Zfinx' in x for x in opnode['isa']])
-        is_sgn_extd = True if (inxFlag and iflen < xlen) else False
+        is_sgn_extd = True if (inxFlag and flen > iflen) else False
         
         if is_fext:
             if fl>ifl:

@@ -2588,25 +2588,25 @@ fcvt.l.h:
     sz: 'SIGALIGN'
   val:
     stride: 1
-    sz: '8'
-    val_template: "'.dword $val;'"
-    load_instr: "ld"
-  xlen: [32,64]
+    sz: 'FLEN/8'
+    val_template: "'NAN_BOXED($val,$width,FLEN)'"
+    load_instr: "FLREG"
+  xlen: [64]
+  std_op:
   isa: 
     - IF_Zicsr_Zfh
-  std_op:
   flen: [16,32,64]
-  rm_val_data: '[7,0,1,2,3,4]'
+  rm_val_data: '[0,1,2,3,4,7]'
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_fregs
+  rs1_op_data: *all_fregs
+  rd_op_data: *all_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
     val_offset:$val_offset; rmval:$rm_val; correctval:??; testreg:$testreg;
-    fcsr_val: $fcsr*/
-    TEST_FPIO_OP($inst, $rd, $rs1, $rm_val, $fcsr, $correctval, $valaddr_reg, $val_offset, $flagreg, $swreg, $testreg,$load_instr)
+    fcsr_val:$fcsr*/
+    TEST_FPID_OP($inst, $rd, $rs1, $rm_val, $fcsr, $correctval, $valaddr_reg, $val_offset, $flagreg, $swreg, $testreg,$load_instr)
 
 fcvt.lu.h:
   sig:
@@ -2614,22 +2614,22 @@ fcvt.lu.h:
     sz: 'SIGALIGN'
   val:
     stride: 1
-    sz: '8'
-    val_template: "'.dword $val;'"
-    load_instr: "ld"
-  xlen: [32,64]
+    sz: 'FLEN/8'
+    val_template: "'NAN_BOXED($val,$width,FLEN)'"
+    load_instr: "FLREG"
+  xlen: [64]
   isa: 
     - IF_Zicsr_Zfh
   flen: [16,32,64]
-  rm_val_data: '[7,0,1,2,3,4]'
+  rm_val_data: '[0,1,2,3,4,7]'
   fcsr_data: '[x<<5|y for x,y in itertools.product([0,1,2,3,4],range(0,2**5))]'
   std_op:
   formattype: 'fsrformat'
-  rs1_op_data: *all_regs
-  rd_op_data: *all_fregs
+  rs1_op_data: *all_fregs
+  rd_op_data: *all_regs
   template: |-
     // $comment
     /* opcode: $inst ; op1:$rs1; dest:$rd; op1val:$rs1_val; valaddr_reg:$valaddr_reg;
     val_offset:$val_offset; rmval:$rm_val; correctval:??; testreg:$testreg;
-    fcsr_val: $fcsr*/
-    TEST_FPIO_OP($inst, $rd, $rs1, $rm_val, $fcsr, $correctval, $valaddr_reg, $val_offset, $flagreg, $swreg, $testreg,$load_instr)
+    fcsr_val:$fcsr*/
+    TEST_FPID_OP($inst, $rd, $rs1, $rm_val, $fcsr, $correctval, $valaddr_reg, $val_offset, $flagreg, $swreg, $testreg,$load_instr)
